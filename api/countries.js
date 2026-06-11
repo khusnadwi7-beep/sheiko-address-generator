@@ -8,22 +8,24 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch("https://api.restcountries.com/countries/v5/all", {
+    const response = await fetch("https://api.restcountries.com/countries/v5?q=", {
       headers: {
         Authorization: `Bearer ${API_KEY}`
       }
     });
 
+    const text = await response.text();
+
     if (!response.ok) {
       return res.status(response.status).json({
-        error: "Gagal mengambil data REST Countries"
+        error: "Gagal mengambil data REST Countries",
+        status: response.status,
+        detail: text
       });
     }
 
-    const data = await response.json();
-
     res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate");
-    return res.status(200).json(data);
+    return res.status(200).send(text);
   } catch (err) {
     return res.status(500).json({
       error: "Server error",
